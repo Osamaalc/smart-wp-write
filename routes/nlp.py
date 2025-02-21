@@ -1,3 +1,5 @@
+import uuid
+
 from fastapi import APIRouter, Depends, UploadFile, status,Request
 from fastapi.responses import JSONResponse
 import logging
@@ -48,7 +50,7 @@ async def index_project(request:Request,project_id:str,push_request:PushRequest)
         if not page_chunks or len(page_chunks)==0:
             has_records=False
             break
-        chunks_ids=list(range(idx,idx+len(page_chunks)))
+        chunks_ids = [str(uuid.uuid4()) for _ in range(len(page_chunks))]
         idx+=len(page_chunks)
         is_inserted= nlp_controller.index_info_vector_db(
             project=project,

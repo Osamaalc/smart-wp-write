@@ -5,6 +5,8 @@ import weaviate
 from typing import List
 from weaviate.classes.config import Configure, Property, DataType
 from weaviate.collections.classes.config import VectorDistances
+from weaviate.collections.classes.grpc import MetadataQuery
+from typing import List, Optional
 
 from ..VectorDBEnums import DistanceMethodEnum
 from models.db_schemes import RetrieveDocument
@@ -146,103 +148,44 @@ class WeaviateDBProvider(VectorDBInterfase):
     #                 return False
     #     return True
     import uuid
-    from typing import List, Optional
-
-    def insert_many(self, collection_name: str, texts: List[str], vectors: List[list],
-                    metadata: Optional[List[dict]] = None, record_ids: Optional[List[str]] = None,
-                    batch_size: int = 50) -> bool:
-        """إدخال مجموعة من المستندات دفعة واحدة إلى مجموعة Weaviate."""
-        # تحقق من أن جميع القوائم لها نفس الطول
-        if not (len(texts) == len(vectors) == (len(metadata) if metadata else len(texts)) == (
-        len(record_ids) if record_ids else len(texts))):
-            raise ValueError("All input lists (texts, vectors, metadata, record_ids) must have the same length.")
-
-        # إعداد القيم الافتراضية
-        if metadata is None:
-            metadata = [None] * len(texts)
-        if record_ids is None:
-            record_ids = [str(uuid.uuid4()) for _ in range(len(texts))]  # استخدام UUID لضمان الفريدة
-
-        # بدء الإدخال على دفعات
-        try:
-            with self.client.batch.fixed_size(batch_size=batch_size) as batch:
-                for text, vector, meta, record_id in zip(texts, vectors, metadata, record_ids):
-                    batch.add_object(
-                        collection=collection_name,
-                        properties={
-                            "text": text,
-                            "metadata": meta
-                        },
-                        vector=vector,
-                        uuid=record_id
-                    )
-        except Exception as e:
-            self.logger.error(f"❌ Error inserting batch: {e}")
-            return False
-
-        return True
-
     import uuid
     from typing import List, Optional
 
-    def insert_many(self, collection_name: str, texts: List[str], vectors: List[list],
-                    metadata: Optional[List[dict]] = None, record_ids: Optional[List[str]] = None,
-                    batch_size: int = 50) -> bool:
-        """إدخال مجموعة من المستندات دفعة واحدة إلى مجموعة Weaviate."""
 
-        # تحقق من أن جميع القوائم لها نفس الطول
+
+    def insert_many(
+            self,
+            collection_name: str,
+            texts: List[str],
+            vectors: List[list],
+            metadata: Optional[List[dict]] = None,
+            record_ids: Optional[List[str]] = None,
+            batch_size: int = 50
+    ) -> bool:
+        """
+        إدخال مجموعة من المستندات دفعة واحدة إلى مجموعة Weaviate.
+
+        :param collection_name: اسم المجموعة في Weaviate.
+        :param texts: قائمة بالنصوص المراد إدراجها.
+        :param vectors: قائمة المتجهات المقابلة لكل نص.
+        :param metadata: قائمة بالبيانات الوصفية (اختياري).
+        :param record_ids: قائمة بالمعرّفات الفريدة (UUID) لكل نص. إذا كانت None، يتم توليد UUID تلقائيًا.
+        :param batch_size: حجم الدفعة المستخدمة للإدخال.
+        :return: True إذا تم الإدخال بنجاح، وإلا False.
+        """
+        # التأكد من تساوي أطوال القوائم
         if not (len(texts) == len(vectors) == (len(metadata) if metadata else len(texts)) == (
         len(record_ids) if record_ids else len(texts))):
             raise ValueError("All input lists (texts, vectors, metadata, record_ids) must have the same length.")
 
-        # إعداد القيم الافتراضية
+        # إعداد البيانات الوصفية الافتراضية
         if metadata is None:
             metadata = [None] * len(texts)
+
+        # توليد UUID صالح إذا لم تُمرَّر record_ids، أو التحقق منها إذا تم تمريرها
         if record_ids is None:
-            record_ids = [str(uuid.uuid4()) for _ in range(len(texts))]  # ✅ استخدام UUID كنصوص
-        else:
-            record_ids = [str(record_id) for record_id in record_ids]  # ✅ تحويل أي معرف إلى نص
-
-        # بدء الإدخال على دفعات
-        try:
-            with self.client.batch.fixed_size(batch_size=batch_size) as batch:
-                for text, vector, meta, record_id in zip(texts, vectors, metadata, record_ids):
-                    batch.add_object(
-                        collection=collection_name,
-                        properties={
-                            "text": text,
-                            "metadata": meta
-                        },
-                        vector=vector,
-                        uuid=record_id  # ✅ الآن سيكون دائمًا من نوع str أو uuid.UUID
-                    )
-        except Exception as e:
-            self.logger.error(f"❌ Error inserting batch: {e}")
-            return False
-
-        return True
-
-    import uuid
-    from typing import List, Optional
-
-    def insert_many(self, collection_name: str, texts: List[str], vectors: List[list],
-                    metadata: Optional[List[dict]] = None, record_ids: Optional[List[str]] = None,
-                    batch_size: int = 50) -> bool:
-        """إدخال مجموعة من المستندات دفعة واحدة إلى مجموعة Weaviate."""
-
-        # تحقق من أن جميع القوائم لها نفس الطول
-        if not (len(texts) == len(vectors) == (len(metadata) if metadata else len(texts)) == (
-        len(record_ids) if record_ids else len(texts))):
-            raise ValueError("All input lists (texts, vectors, metadata, record_ids) must have the same length.")
-
-        # إعداد القيم الافتراضية
-        if metadata is None:
-            metadata = [None] * len(texts)
-        if record_ids is None:
-            # ✅ استخدام UUID صالح
             record_ids = [str(uuid.uuid4()) for _ in range(len(texts))]
         else:
-            # ✅ ضمان أن جميع المعرفات هي UUID صالح
             try:
                 record_ids = [str(uuid.UUID(str(record_id))) for record_id in record_ids]
             except ValueError as e:
@@ -268,31 +211,70 @@ class WeaviateDBProvider(VectorDBInterfase):
 
         return True
 
-    def search_by_vector(self, collection_name: str, vector: list, limit: int = 5) -> List[RetrieveDocument]:
-        """البحث باستخدام المتجهات."""
+    # def search_by_vector(self, collection_name: str, vector: list, limit: int = 5) -> List[RetrieveDocument]:
+    #     """البحث باستخدام المتجهات."""
+    #     try:
+    #         # بناء وتنفيذ استعلام البحث باستخدام المتجه
+    #         result = (
+    #             self.client.query.get(
+    #                 collection_name,
+    #                 ["text", "metadata"]
+    #             )
+    #             .with_near_vector({
+    #                 "vector": vector,
+    #                 "distance": self.distance_method  # أو يمكنك استخدام "certainty" حسب الإعدادات المطلوبة
+    #             })
+    #             .with_limit(limit)
+    #             .do()
+    #         )
+    #         # الوصول إلى النتائج من الرد ضمن: data -> Get -> collection_name
+    #         items = result.get("data", {}).get("Get", {}).get(collection_name, [])
+    #         return [
+    #             RetrieveDocument(
+    #                 score=item["_additional"]["certainty"],
+    #                 text=item["text"]
+    #             ) for item in items
+    #         ]
+    #     except Exception as e:
+    #         self.logger.error(f"❌ Error during vector search: {e}")
+    #         return []
+
+    def search_by_vector(self, collection_name: str, vector: List[float], limit: int = 5) -> Optional[
+        List[RetrieveDocument]]:
+        """
+        بحث باستخدام المتجه في Weaviate (الإصدار الرابع).
+        يعيد قائمة من كائنات RetrieveDocument أو None إذا لم توجد نتائج.
+
+        :param collection_name: اسم المجموعة (Collection) في Weaviate.
+        :param vector: المتجه الذي سيتم البحث بناءً عليه.
+        :param limit: الحد الأقصى لعدد النتائج.
+        :return: قائمة من RetrieveDocument تحتوي على النص ودرجة التشابه (score) أو None.
+        """
         try:
-            # بناء وتنفيذ استعلام البحث باستخدام المتجه
-            result = (
-                self.client.query.get(
-                    collection_name,
-                    ["text", "metadata"]
-                )
-                .with_near_vector({
-                    "vector": vector,
-                    "distance": self.distance_method  # أو يمكنك استخدام "certainty" حسب الإعدادات المطلوبة
-                })
-                .with_limit(limit)
-                .do()
+            # الحصول على الكائن الخاص بالمجموعة من Weaviate
+            collection = self.client.collections.get(collection_name)
+
+            # تنفيذ استعلام البحث باستخدام near_vector مع طلب إرجاع معلومات المسافة (distance)
+            response = collection.query.near_vector(
+                near_vector=vector,
+                limit=limit,
+                return_metadata=MetadataQuery(distance=True)
             )
-            # الوصول إلى النتائج من الرد ضمن: data -> Get -> collection_name
-            items = result.get("data", {}).get("Get", {}).get(collection_name, [])
+
+            # استخراج الكائنات (objects) من الاستجابة
+            objects = response.objects
+
+            if not objects or len(objects) == 0:
+                return None
+
+            # بناء قائمة النتائج من خلال تحويل كل كائن إلى RetrieveDocument
             return [
                 RetrieveDocument(
-                    score=item["_additional"]["certainty"],
-                    text=item["text"]
-                ) for item in items
+                    score=obj.metadata.distance,  # يمكن تعديلها إلى certainty إن كنت تستخدم ذلك
+                    text=obj.properties.get("text", "")
+                )
+                for obj in objects
             ]
         except Exception as e:
             self.logger.error(f"❌ Error during vector search: {e}")
-            return []
-
+            return None

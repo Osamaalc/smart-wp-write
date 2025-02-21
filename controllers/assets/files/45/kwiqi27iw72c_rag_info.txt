@@ -1,0 +1,54 @@
+ Curriculum Vitae  
+
+ Personal Information  
+- Name: Osama Abdulrahman Ali Saad Al-Kaboudi  
+- Address: Sana'a, Thalathin Street  
+- Phone Number: 783243355  
+- Email: [oo491943@gmail.com](mailto:oo491943@gmail.com)  
+- GitHub Link: [GitHub]()  
+
+
+
+ Profile  
+A student specializing in Artificial Intelligence at Al-Razi University, nearing the completion of a Bachelor's degree. I have practical experience in areas such as Retrieval-Augmented Generation (RAG), Natural Language Processing (NLP), and deep neural networks. I possess advanced programming skills using Python and AI tools, as well as experience in managing both traditional and vector databases. I seek to join a stimulating work environment where I can leverage my skills to develop innovative solutions that improve processes and achieve organizational goals.  
+
+
+
+ Education  
+- University: Al-Razi University  
+- Major: Artificial Intelligence  
+- Expected Graduation Year: 2025 (The thesis defense is scheduled within two months)  
+
+
+
+ Work Experience and Projects  
+- Graduation Project:  
+  - ChatPDF: An AI-powered application for analyzing and interacting with PDF documents, including:  
+    - Summarizing texts using AI techniques  
+    - Automatically generating exams from PDF documents  
+    - Developing a chatbot capable of understanding texts and interacting with users  
+
+- Other Projects:  
+  - Movie classification based on descriptions using Natural Language Processing (NLP) techniques  
+
+
+
+ Skills  
+- Programming:  
+  - Python (Intermediate level in AI applications)  
+- AI Frameworks:  
+  - PyTorch and TensorFlow for building and training deep learning models  
+- API Development:  
+  - Using FastAPI to develop high-performance APIs  
+- Databases:  
+  - NoSQL databases like MongoDB  
+  - SQL databases like PostgreSQL  
+  - Vector databases  
+
+
+
+ Languages  
+- Arabic: Native language  
+- English: Beginner level, currently improving through self-study  
+
+
