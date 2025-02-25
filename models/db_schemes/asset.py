@@ -1,6 +1,5 @@
 from datetime import datetime
 from typing import Optional
-
 from bson import ObjectId
 from pydantic import BaseModel, Field
 
@@ -11,7 +10,7 @@ class Asset(BaseModel):
     asset_type: str = Field(..., min_length=1)
     asset_name: str = Field(..., min_length=1)
     asset_size: int = Field(ge=0, default=None)
-    asset_config :dict=Field(default=None)
+    asset_config: dict = Field(default=None)
     asset_pushed_at: datetime = Field(default=datetime.utcnow)
 
     class Config:
@@ -19,14 +18,20 @@ class Asset(BaseModel):
 
     @classmethod
     def get_indexes(cls):
+        """
+        Returns the indexes for the Asset model.
+
+        :return: A list of index definitions for the Asset model.
+        """
         return [
-            {"key": [("asset_project_id", 1)],
-             "name": "asset_project_id_index",
-             'unique': False}
-            ,
+            {
+                "key": [("asset_project_id", 1)],
+                "name": "asset_project_id_index",
+                "unique": False
+            },
             {
                 "key": [("asset_project_id", 1), ("asset_name", 1)],
                 "name": "asset_project_id_name_index_1",
-                'unique': True
+                "unique": True
             }
         ]

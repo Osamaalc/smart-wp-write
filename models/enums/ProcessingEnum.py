@@ -1,4 +1,9 @@
 from enum import Enum
+
+
 class ProcessingEnum(Enum):
-    TXT =".txt"
-    PDF =".pdf"
+    """
+    Enum representing different file processing types based on file extensions.
+    """
+    TXT = ".txt"
+    PDF = ".pdf"

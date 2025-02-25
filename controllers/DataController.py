@@ -2,7 +2,6 @@ import os
 import re
 
 from fastapi import UploadFile
-
 from models import ResponseSignal
 from .BaseController import BaseController
 from .ProjectController import ProjectController
@@ -10,14 +9,17 @@ from .ProjectController import ProjectController
 
 class DataController(BaseController):
     def __init__(self):
-        # استدعاء دالة البناء من الكلاس الأساسي (BaseController)
+        # Call the constructor of the base class (BaseController)
         super().__init__()
-        # تعريف حجم الملف بالميجابايت (1 ميجابايت = 1048576 بايت)
+        # Define file size limit in bytes (1 MB = 1048576 bytes)
         self.size_scale = 1048576
 
     def validate_uploaded_file(self, file: UploadFile):
         """
-        التحقق من صحة الملف المرفوع.
+        Validate the uploaded file.
+
+        :param file: The uploaded file to validate.
+        :return: Tuple (Boolean indicating validity, validation message)
         """
         if file.content_type not in self.app_settings.FILE_ALLOWED_TYPE:
             return False, ResponseSignal.FILE_TYPE_NOT_SUPPORTED.value
@@ -28,7 +30,11 @@ class DataController(BaseController):
 
     def generate_unique_filepath(self, orig_file_name: str, project_id: str):
         """
-        إنشاء اسم ملف فريد بناءً على اسم الملف الأصلي ومعرف المشروع.
+        Generate a unique file path based on the original file name and project ID.
+
+        :param orig_file_name: The original file name.
+        :param project_id: The project ID to create a project-specific file path.
+        :return: The unique file path and the new file name.
         """
         random_key = self.genarate_random_string()
         project_controller = ProjectController()
@@ -36,16 +42,19 @@ class DataController(BaseController):
         cleaned_file_name = self.get_clean_file_name(orig_file_name=orig_file_name)
         new_file_path = os.path.join(project_path, random_key + "_" + cleaned_file_name)
 
-        # التأكد من أن اسم الملف فريد
+        # Ensure the file name is unique
         while os.path.exists(new_file_path):
             random_key = self.genarate_random_string()
             new_file_path = os.path.join(project_path, random_key + "_" + cleaned_file_name)
 
-        return new_file_path,random_key + "_" + cleaned_file_name
+        return new_file_path, random_key + "_" + cleaned_file_name
 
     def get_clean_file_name(self, orig_file_name: str):
         """
-        تنظيف اسم الملف من الأحرف غير المرغوب فيها.
+        Clean the file name by removing unwanted characters.
+
+        :param orig_file_name: The original file name to clean.
+        :return: The cleaned file name.
         """
         cleaned_file_name = re.sub(r'[^\w.]', '', orig_file_name.strip())
         cleaned_file_name = cleaned_file_name.replace(' ', '_')
